@@ -1,7 +1,7 @@
 # This Python 3 environment comes with many helpful analytics libraries installed
 # It is defined by the kaggle/python docker image: https://github.com/kaggle/docker-python
-# For example, here's several helpful packages to load in 
-
+# For example, here's several helpful packages to load in
+import time
 from datetime import date, timedelta
 
 import pandas as pd
@@ -9,23 +9,17 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 import lightgbm as lgb
 
-# Input data files are available in the "../input/" directory.
-# For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
-
-from subprocess import check_output
-print("Loading existing data from:")
-print(check_output(["ls", "../input"]).decode("utf8"))
-
 # Any results you write to the current directory are saved as output.
+start_time = time.time()
 
-X_train = pd.read_csv('../input/my-data-preprocessing/X_train.csv')
-y_train = np.genfromtxt('../input/my-data-preprocessing/y_train.csv', delimiter=",")
-X_val = pd.read_csv('../input/my-data-preprocessing/X_val.csv')
-y_val = np.genfromtxt('../input/my-data-preprocessing/y_val.csv', delimiter=",")
-X_test = pd.read_csv('../input/my-data-preprocessing/X_test.csv')
+X_train = pd.read_csv('../input/X_train.csv')
+y_train = np.genfromtxt('../input/y_train.csv', delimiter=",")
+X_val = pd.read_csv('../input/X_val.csv')
+y_val = np.genfromtxt('../input/y_val.csv', delimiter=",")
+X_test = pd.read_csv('../input/X_test.csv')
 
 df_train = pd.read_csv(
-    '../input/favorita-grocery-sales-forecasting/train.csv', usecols=[1, 2, 3, 4, 5],
+    '../input/train.csv', usecols=[1, 2, 3, 4, 5],
     dtype={'onpromotion': bool},
     converters={'unit_sales': lambda u: np.log1p(
         float(u)) if float(u) > 0 else 0},
@@ -34,7 +28,7 @@ df_train = pd.read_csv(
 )
 
 df_test = pd.read_csv(
-    "../input/favorita-grocery-sales-forecasting/test.csv", usecols=[0, 1, 2, 3, 4],
+    "../input/test.csv", usecols=[0, 1, 2, 3, 4],
     dtype={'onpromotion': bool},
     parse_dates=["date"]  # , date_parser=parser
 ).set_index(
@@ -68,7 +62,7 @@ else:
 
 print("Training and predicting models...")
 params = {
-    'num_leaves': 2**8 - 1,
+    'num_leaves': 2**10 - 1,
     'objective': 'regression_l2',
     # 'max_depth': 8,
     'min_data_in_leaf': 50,
@@ -77,7 +71,7 @@ params = {
     'bagging_fraction': 0.75,
     'bagging_freq': 1,
     'metric': 'l2',
-    'num_threads': 4
+    'num_threads': 8
 }
 
 cate_names = ['store_type', 'store_cluster', 'item_perishable', 'item_class']
@@ -127,4 +121,6 @@ df_preds.index.set_names(["store_nbr", "item_nbr", "date"], inplace=True)
 
 submission = df_test[["id"]].join(df_preds, how="left").fillna(0)
 submission["unit_sales"] = np.clip(np.expm1(submission["unit_sales"]), 0, 1000)
-submission.to_csv('lgb.csv', float_format='%.4f', index=None)
+submission.to_csv('../output/lgb.csv', float_format='%.4f', index=None)
+
+print("------ Time used: {} s ------".format(time.time()-start_time))
