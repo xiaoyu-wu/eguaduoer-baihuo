@@ -62,13 +62,13 @@ else:
 
 print("Training and predicting models...")
 params = {
-    'num_leaves': 2**10 - 1,
+    'num_leaves': 2**8 - 1,
     'objective': 'regression_l2',
     # 'max_depth': 8,
     'min_data_in_leaf': 50,
     'learning_rate': 0.03,
     'feature_fraction': 0.75,
-    'bagging_fraction': 0.75,
+    'bagging_fraction': 0.50,
     'bagging_freq': 1,
     'metric': 'l2',
     'num_threads': 8
@@ -78,7 +78,7 @@ cate_names = ['store_type', 'store_cluster', 'item_perishable', 'item_class']
 cate_vars = [list(X_train.columns).index(i) for i in cate_names]
 print("{} categorical features found in the training set. column #: {}".format(len(cate_vars), cate_vars))
 
-MAX_ROUNDS = 1000
+MAX_ROUNDS = 3000
 val_pred = []
 test_pred = []
 
