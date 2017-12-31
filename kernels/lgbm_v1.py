@@ -66,9 +66,9 @@ params = {
     'objective': 'regression_l2',
     # 'max_depth': 8,
     'min_data_in_leaf': 50,
-    'learning_rate': 0.03,
-    'feature_fraction': 0.75,
-    'bagging_fraction': 0.50,
+    'learning_rate': 0.05,
+    'feature_fraction': 0.50,
+    'bagging_fraction': 0.75,
     'bagging_freq': 1,
     'metric': 'l2',
     'num_threads': 8
